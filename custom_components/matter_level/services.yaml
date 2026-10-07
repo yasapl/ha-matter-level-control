@@ -1,0 +1,67 @@
+move:
+  name: Move
+  description: Start native continuous Matter Level Control movement.
+  fields:
+    node_id:
+      name: Node ID
+      description: Matter node ID.
+      required: true
+      example: 57
+      selector:
+        number:
+          min: 1
+          mode: box
+    endpoint_id:
+      name: Endpoint ID
+      description: Matter endpoint exposing the Level Control cluster.
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 0
+          max: 65535
+          mode: box
+    direction:
+      name: Direction
+      description: Direction in which to change the level.
+      required: true
+      selector:
+        select:
+          options:
+            - up
+            - down
+    rate:
+      name: Rate
+      description: Matter level units per second.
+      required: false
+      default: 50
+      example: 50
+      selector:
+        number:
+          min: 1
+          max: 254
+          mode: slider
+
+stop:
+  name: Stop
+  description: Stop native Matter Level Control movement at the current level.
+  fields:
+    node_id:
+      name: Node ID
+      description: Matter node ID.
+      required: true
+      example: 57
+      selector:
+        number:
+          min: 1
+          mode: box
+    endpoint_id:
+      name: Endpoint ID
+      description: Matter endpoint exposing the Level Control cluster.
+      required: true
+      example: 1
+      selector:
+        number:
+          min: 0
+          max: 65535
+          mode: box
