@@ -1,16 +1,42 @@
 # Matter Level Control for Home Assistant
 
-A Home Assistant custom integration that exposes native Matter **Level Control** commands for Matter lights.
+A Home Assistant custom integration exposing native Matter **Level Control** commands.
 
-The integration was created to support smooth press-and-hold dimming. Home Assistant's normal `light.turn_on` brightness changes work well for setting a specific brightness, but repeatedly sending brightness values during a button hold can result in visible stepping or overlapping transitions.
+Its primary purpose is smooth, native control of continuously adjustable Matter devices — most notably **light brightness / dimming**. Matter Level Control is the cluster behind level-based operations such as moving a level up or down, stepping it, moving to a specific level, and stopping movement.
 
-Matter already provides native Level Control commands designed for this purpose. This integration makes those commands available to Home Assistant automations.
+If you are looking for **Matter light brightness control**, **smooth hold-to-dim**, **Matter dimming**, **continuous brightness adjustment**, or other Matter devices that expose a controllable level (for example a device using Level Control for speed), this integration provides access to Matter's native `Move` and `Stop` commands from Home Assistant automations.
+
+> **Current implementation:** entity targeting is currently limited to Home Assistant Matter `light` entities. The underlying Matter Level Control cluster is not inherently lighting-specific, so support for other Matter entity types may be added where devices expose the cluster appropriately.
+
+## Why this integration exists
+
+Home Assistant's normal `light.turn_on` brightness control works well when setting a specific brightness. It is less suitable for a physical switch or rotary controller where the desired behaviour is:
+
+**press and hold → smoothly increase/decrease brightness → release → stop immediately**
+
+One way to implement this in Home Assistant is to repeatedly send slightly different brightness values. In practice that can produce visible stepping, overlapping transitions and unnecessary command traffic.
+
+Matter already has commands specifically designed for continuous level changes. A single `Move` command tells the Matter device itself to start changing its level. A subsequent `Stop` command stops it at its current level.
+
+This integration exposes those native commands to Home Assistant.
+
+## Matter Level Control
+
+The Matter Level Control cluster is a generic level-control mechanism. Depending on the Matter device type and implementation, a level may represent something such as:
+
+- light brightness / dimming
+- another continuously adjustable actuator level
+- speed on a device that implements speed through Level Control
+
+Many device classes have their own dedicated Matter clusters — for example, fans can use Matter Fan Control — so the presence of an adjustable value does **not** automatically mean that a device supports Level Control.
+
+The device must actually expose the Matter Level Control cluster and implement the required commands.
 
 ## Features
 
-- Native Matter `Move` command for continuous dimming
-- Native Matter `Stop` command to stop immediately at the current brightness
-- Dimming up or down
+- Native Matter `Move` command for continuous level changes
+- Native Matter `Stop` command to stop immediately at the current level
+- Move up or down
 - Configurable movement rate
 - Targets Home Assistant Matter light entities directly
 - Uses Home Assistant's existing Matter integration and Matter Server connection
@@ -19,7 +45,8 @@ Matter already provides native Level Control commands designed for this purpose.
 ## Requirements
 
 - Home Assistant with the built-in Matter integration configured
-- A Matter light exposing the Matter Level Control cluster
+- Currently, a Matter light exposed as a Home Assistant `light` entity
+- The Matter endpoint must expose the Level Control cluster
 - The device must support the required Level Control `Move` and `Stop` commands
 
 ## Installation
@@ -32,7 +59,7 @@ This project is currently under development and should be considered experimenta
 
 ## Usage
 
-### Start dimming up
+### Start increasing brightness
 
 ```yaml
 action: matter_level.move
@@ -43,7 +70,7 @@ data:
   rate: 50
 ```
 
-### Start dimming down
+### Start decreasing brightness
 
 ```yaml
 action: matter_level.move
@@ -54,7 +81,7 @@ data:
   rate: 50
 ```
 
-### Stop dimming
+### Stop at the current brightness
 
 ```yaml
 action: matter_level.stop
@@ -72,7 +99,7 @@ A typical wall-switch automation sends `matter_level.move` when a button is held
 
 A conventional Home Assistant hold-to-dim automation often repeatedly calls `light.turn_on` with a slightly different brightness. Each call sets another absolute level and may start another transition.
 
-Matter's `Move` command instead tells the light itself to continuously change its level. The light continues moving without further commands until a `Stop` command is received (or a limit is reached). This generally provides much smoother dimming and requires only two commands for an entire button hold.
+Matter's `Move` command instead tells the device itself to continuously change its level. The device continues moving without further commands until a `Stop` command is received (or a limit is reached). This generally provides much smoother control and requires only two commands for an entire button hold.
 
 ## Status
 
