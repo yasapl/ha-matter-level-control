@@ -53,18 +53,13 @@ The device must actually expose the Matter Level Control cluster and implement t
 
 ### HACS
 
-1. Add this repository to HACS as a custom repository with category **Integration**.
-2. Install **Matter Level Control**.
-3. Add the following to your Home Assistant `configuration.yaml`:
+1. Install **Matter Level Control** through HACS. Until the integration is included in the default HACS catalogue, add this repository as a custom repository with category **Integration** first.
+2. Restart Home Assistant.
+3. Go to **Settings → Devices & services → Add Integration**.
+4. Search for **Matter Level Control** and add it.
+5. `matter_level.move` and `matter_level.stop` will then be available under **Developer Tools → Actions** and in automations.
 
-```yaml
-matter_level:
-```
-
-4. Restart Home Assistant.
-5. After restart, `matter_level.move` and `matter_level.stop` should be available under **Developer Tools → Actions** and in automations.
-
-The YAML entry is currently required because the integration does not yet use a Home Assistant config flow/UI setup.
+No `configuration.yaml` entry is required for new installations. Existing YAML installations using `matter_level:` remain supported for backwards compatibility.
 
 This project is currently under development and should be considered experimental.
 
