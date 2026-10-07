@@ -7,6 +7,7 @@ from chip.clusters import Objects as clusters
 
 from homeassistant.components.light import DOMAIN as LIGHT_DOMAIN
 from homeassistant.components.matter.entity import MatterEntity
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ENTITY_ID
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.exceptions import ServiceValidationError
@@ -57,8 +58,10 @@ def _get_matter_light(hass: HomeAssistant, entity_id: str) -> MatterEntity:
     return entity
 
 
-async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up Matter Level Control services."""
+def _register_services(hass: HomeAssistant) -> None:
+    """Register Matter Level Control services once."""
+    if hass.services.has_service(DOMAIN, SERVICE_MOVE):
+        return
 
     async def async_move(call: ServiceCall) -> None:
         """Start continuous native Matter level movement."""
@@ -93,4 +96,22 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     hass.services.async_register(DOMAIN, SERVICE_MOVE, async_move, schema=MOVE_SCHEMA)
     hass.services.async_register(DOMAIN, SERVICE_STOP, async_stop, schema=STOP_SCHEMA)
 
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Set up Matter Level Control from YAML for backwards compatibility."""
+    if DOMAIN in config:
+        _register_services(hass)
+    return True
+
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Set up Matter Level Control from a config entry."""
+    _register_services(hass)
+    return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    """Unload a Matter Level Control config entry."""
+    hass.services.async_remove(DOMAIN, SERVICE_MOVE)
+    hass.services.async_remove(DOMAIN, SERVICE_STOP)
     return True
